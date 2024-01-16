@@ -12,6 +12,16 @@ let articulosCarrito = [];
 cargarEventListeners();
 function cargarEventListeners() {
 	listaCursos.addEventListener("click", agregarCurso);
+
+	// Elimina cursos del carrito
+	carrito.addEventListener("click", eliminarCurso);
+
+	// Vaciar el carrito
+	vaciarCarritoBtn.addEventListener("click", () => {
+		articulosCarrito = []; // Reseteamos el arreglo
+
+		limpiarHTML(); // Limpiamos todo el HTML
+	});
 }
 
 // Funciones
@@ -22,6 +32,20 @@ function agregarCurso(e) {
 		const cursoSeleccionado = e.target.parentElement.parentElement;
 
 		leerDatosCurso(cursoSeleccionado);
+	}
+}
+
+// Elimina un curso del carrito
+function eliminarCurso(e) {
+	if (e.target.classList.contains("borrar-curso")) {
+		const cursoId = e.target.getAttribute("data-id");
+
+		// Elimina del arreglo de articulosCarrito por el data-id
+		articulosCarrito = articulosCarrito.filter((curso) => {
+			return curso.id !== cursoId;
+		});
+
+		carritoHTML(); // Iterar sobre el carrito y mostrar su HTML
 	}
 }
 
@@ -38,8 +62,27 @@ function leerDatosCurso(curso) {
 		cantidad: 1,
 	};
 
+	// Revisa si un elemento ya existe en el carrito
+	const existe = articulosCarrito.some((curso) => {
+		return curso.id === infoCurso.id;
+	});
+
+	if (existe) {
+		// Actualizamos la cantidad
+		const cursos = articulosCarrito.map((curso) => {
+			if (curso.id === infoCurso.id) {
+				curso.cantidad++;
+
+				return curso;
+			}
+		});
+		articulosCarrito = [...cursos];
+	} else {
+		// Agregamos el curso al carrito
+		articulosCarrito = [...articulosCarrito, infoCurso];
+	}
+
 	// Agrega elementos al arreglo de carrito
-	articulosCarrito = [...articulosCarrito, infoCurso];
 
 	console.log(articulosCarrito);
 
@@ -53,22 +96,27 @@ function carritoHTML() {
 
 	// Recorre el carrito y genera el HTML
 	articulosCarrito.forEach((curso) => {
+		const { imagen, titulo, precio, cantidad, id } = curso;
 		const row = document.createElement("tr");
 		row.innerHTML = `
 			<td>
-				<img src="${curso.imagen}" width="100"
+				<img src="${imagen}" width="100"
 			</td>
 
 			<td>
-				${curso.titulo}
+				${titulo}
 			</td>
 
 			<td>
-				${curso.precio}
+				${precio}
 			</td>
 
 			<td>
-				${curso.cantidad}
+				${cantidad}
+			</td>
+
+			<td>
+				<a href="#" class="borrar-curso" data-id="${id}">X</a>
 			</td>
 		`;
 
